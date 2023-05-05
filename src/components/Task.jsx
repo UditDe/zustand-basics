@@ -1,14 +1,20 @@
+import classNames from "classnames";
 import "./Task.css";
-
-const STATUS = "PLANNED";
+import { useStore } from "../store";
+import { shallow } from "zustand/shallow";
 
 export default function Task({ title }) {
+	const task = useStore(
+		(store) => store.tasks.find((task) => task.title === title),
+		shallow
+	);
+
 	return (
 		<div className="task">
-			<div>{title}</div>
+			<div>{task.title}</div>
 			<div className="bottomWrapper">
 				<div></div>
-				<div className="status">{STATUS}</div>
+				<div className={classNames("status", task.state)}>{task.state}</div>
 			</div>
 		</div>
 	);
