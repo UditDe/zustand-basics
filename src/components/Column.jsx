@@ -1,10 +1,12 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import "./Column.css";
 import Task from "./Task";
 import { useStore } from "../store";
 import { shallow } from "zustand/shallow";
 
 function Column({ state }) {
+	const [text, setText] = useState("");
+	const [open, setOpen] = useState(false);
 	const tasks = useStore(
 		(store) => store.tasks.filter((task) => task.state === state),
 		shallow
@@ -40,12 +42,51 @@ function Column({ state }) {
 	 * 	return true;
 	 * }
 	 */
+
+	const addTask = useStore((store) => store.addTasks);
+	const setDraggedTask = useStore((store) => store.setDraggedTask);
+	const draggedTask = useStore((store) => store.draggedtask);
+	const moveTask = useStore((store) => store.moveTask);
+
 	return (
-		<div className="column">
-			<p>{state}</p>
-			{tasks.map((task, index) => (
-				<Task title={task.title} key={index} />
+		<div
+			className="column"
+			onDragOver={(e) => {
+				e.preventDefault();
+			}}
+			onDrop={() => {
+				console.log(draggedTask);
+				moveTask(draggedTask, state);
+				setDraggedTask(null);
+			}}>
+			<div className="titleWrapper">
+				<p>{state}</p>
+				<button
+					onClick={() => {
+						setOpen(true);
+					}}>
+					Add
+				</button>
+			</div>
+			{tasks.map((task) => (
+				<Task title={task.title} key={task.title} />
 			))}
+			{open && (
+				<div className="Modal">
+					<div className="ModalContent">
+						<input onChange={(e) => setText(e.target.value)} value={text} />
+						<button
+							type="submit"
+							onClick={() => {
+								addTask(text, state);
+								setText("");
+								setOpen(false);
+							}}>
+							Submit
+						</button>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }
